@@ -1,211 +1,153 @@
-﻿<!--
-Pseudocode / Plan (detailed):
-
-- Window setup:
-  - Use MaterialDesignInXamlToolkit resource dictionaries for Dark theme and color swatches.
-  - Set overall background to a dark material color.
-  - Provide top AppBar area (Header) with app title in Orange accent (#FF9800).
-
-- Root layout:
-  - DockPanel with a Header (TextBlock) docked to Top.
-  - TabControl (Material Design styled) fills remaining space with four TabItem elements:
-    - "Hashing" (first tab) with full UI for hashing workflows.
-    - "Symmetric Encryption"
-    - "Asymmetric Encryption"
-    - "Digital Signatures"
-
-- Hashing Tab layout (Grid with rows):
-  - Row 0: Input area
-    - Label "Input Text" (orange accent).
-    - Multi-line TextBox (MaterialDesignOutlinedTextBox) with hint.
-  - Row 1: Salt input and algorithm options
-    - Left column: Salt single-line TextBox.
-    - Right column: group box / StackPanel with RadioButtons for algorithms:
-      - SHA256, SHA512, MD5
-      - BCrypt -> show cost Slider (min 4, max 16)
-      - Argon2 -> numeric TextBoxes for memory, iterations, parallelism
-    - Use MaterialDesign styles for RadioButtons and sliders.
-  - Row 2: Action area
-    - Primary "Generate Hashes" Button styled with Teal accent (Background #009688, Foreground White).
-  - Row 3: Results DataGrid
-    - Columns: Algorithm, Hash Output, Time (ms)
-    - MaterialDesign styling
-
-- Accessibility & small UX details:
-  - Use HintAssist for placeholders.
-  - Use margins and consistent spacing.
-  - Name controls for future binding/command hookup (e.g., InputTextBox, SaltTextBox, GenerateButton, ResultsDataGrid).
--->
-
-<Window x:Class="Cryptographic_Tool.MainWindow"
+﻿<Window x:Class="Cryptographic_Tool.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:Cryptographic_Tool.Views"
         mc:Ignorable="d"
-        Title="Cryptographic Tool" Height="700" Width="1100"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="#121212"
+        Title="Cryptographic Explorer" Height="700" Width="1100"
+        FontFamily="Segoe UI">
+
     <Window.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <!-- Material Design dark theme and color swatches -->
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignColors.xaml" />
-                <!-- Accent swatches (Teal and Orange available via the colors library) -->
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Teal.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Orange.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+            <!-- 1. Custom Dark Theme Colors -->
+            <Color x:Key="DarkBackgroundColor">#121212</Color>
+            <Color x:Key="DarkSurfaceColor">#1E1E1E</Color>
+            <Color x:Key="DarkElementColor">#2C2C2C</Color>
+            <Color x:Key="LightTextColor">#CCCCCC</Color>
 
-            <!-- Custom brushes -->
+            <!-- 2. Custom Brushes -->
+            <SolidColorBrush x:Key="DarkBackground" Color="{StaticResource DarkBackgroundColor}" />
+            <SolidColorBrush x:Key="DarkSurface" Color="{StaticResource DarkSurfaceColor}" />
+            <SolidColorBrush x:Key="DarkElement" Color="{StaticResource DarkElementColor}" />
+            <SolidColorBrush x:Key="LightText" Color="{StaticResource LightTextColor}" />
+
+            <!-- Accent Brushes (As per plan) -->
             <SolidColorBrush x:Key="AccentOrangeBrush" Color="#FFFF9800" />
+            <!-- Hashing -->
             <SolidColorBrush x:Key="AccentTealBrush" Color="#FF009688" />
+            <!-- Action -->
+            <SolidColorBrush x:Key="AccentGreenBrush" Color="#FF4CAF50" />
+            <!-- Symmetric -->
+            <SolidColorBrush x:Key="AccentBlueBrush" Color="#FF2196F3" />
+            <!-- Asymmetric -->
+            <SolidColorBrush x:Key="AccentRedBrush" Color="#FFF44336" />
+            <!-- Signature -->
+
+            <!-- 3. Custom Styles for Dark Theme -->
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="Background" Value="{StaticResource DarkBackground}" />
+                <Setter Property="Foreground" Value="{StaticResource LightText}" />
+            </Style>
+
+            <Style x:Key="AppDarkTextBox" TargetType="{x:Type TextBox}">
+                <Setter Property="Background" Value="{StaticResource DarkElement}" />
+                <Setter Property="Foreground" Value="{StaticResource LightText}" />
+                <Setter Property="BorderBrush" Value="{StaticResource LightText}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="8,4" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="AppDarkGroupBox" TargetType="{x:Type GroupBox}">
+                <Setter Property="Foreground" Value="{StaticResource LightText}" />
+                <Setter Property="BorderBrush" Value="{StaticResource LightText}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Background" Value="{StaticResource DarkSurface}" />
+            </Style>
+
+            <Style x:Key="AppRaisedButton" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="{StaticResource AccentTealBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="15,10" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF00796B"/>
+                                    <!-- Darker Teal -->
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TabHeaderStyle" TargetType="{x:Type TabItem}">
+                <Setter Property="Background" Value="{StaticResource DarkSurface}"/>
+                <Setter Property="Foreground" Value="{StaticResource LightText}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabItem}">
+                            <Border x:Name="Border" BorderBrush="{StaticResource DarkElement}" BorderThickness="0,0,0,2" Margin="0,0,-1,0" Padding="12,6">
+                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentOrangeBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource AccentOrangeBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#383838"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
         </ResourceDictionary>
     </Window.Resources>
 
     <DockPanel LastChildFill="True" Margin="12">
         <!-- Header -->
-        <Border DockPanel.Dock="Top" Padding="12" Background="{DynamicResource MaterialDesignPaper}">
+        <Border DockPanel.Dock="Top" Padding="12" Background="{StaticResource DarkSurface}">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Cryptographic Tool" FontSize="20" FontWeight="SemiBold"
+                <TextBlock Text="Cryptographic Explorer" FontSize="20" FontWeight="SemiBold"
                            VerticalAlignment="Center" Foreground="{StaticResource AccentOrangeBrush}" />
-                <TextBlock Text="  —  MVVM | Material Design" Margin="8,0,0,0" VerticalAlignment="Center"
-                           Foreground="{DynamicResource MaterialDesignBody}" />
+                <TextBlock Text=" — .NET 9 WPF by Firdavs Jumayev" Margin="8,0,0,0" VerticalAlignment="Center"
+                           Foreground="{StaticResource LightText}" />
             </StackPanel>
         </Border>
 
         <!-- Main Tabs -->
-        <TabControl materialDesign:ColorZoneAssist.Mode="PrimaryDark"
-                    Margin="0,12,0,0"
-                    Background="{DynamicResource MaterialDesignPaper}">
-            <!-- Hashing Tab -->
-            <TabItem Header="Hashing">
+        <!-- Removed materialDesign:ColorZoneAssist.Mode="PrimaryDark" -->
+        <TabControl Background="{StaticResource DarkBackground}" Margin="0,12,0,0">
+
+            <!-- 1. Hashing Tab -->
+            <TabItem Header="Hashing" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentOrangeBrush}">
+                <views:HashingView />
+            </TabItem>
+
+            <!-- 2. Symmetric Encryption Tab -->
+            <TabItem Header="Symmetric Encryption" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentGreenBrush}">
                 <Grid Margin="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <!-- Input label -->
-                        <RowDefinition Height="2*"/>
-                        <!-- Input TextBox -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Salt & Algorithms -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Generate Button -->
-                        <RowDefinition Height="3*"/>
-                        <!-- Results DataGrid -->
-                    </Grid.RowDefinitions>
-
-                    <!-- Input Label -->
-                    <TextBlock Grid.Row="0" Text="Input Text" FontWeight="Bold"
-                               Foreground="{StaticResource AccentOrangeBrush}" Margin="0,0,0,6"/>
-
-                    <!-- Multi-line Input -->
-                    <TextBox x:Name="InputTextBox" Grid.Row="1" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             materialDesign:HintAssist.Hint="Enter text to hash..."
-                             TextWrapping="Wrap" />
-
-                    <!-- Salt and Algorithm Selection -->
-                    <Grid Grid.Row="2" Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="3*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Salt -->
-                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <TextBlock Text="Salt" FontWeight="SemiBold" Foreground="{StaticResource AccentOrangeBrush}" />
-                            <TextBox x:Name="SaltTextBox" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     materialDesign:HintAssist.Hint="Optional salt (base64 or text)" />
-                        </StackPanel>
-
-                        <!-- Algorithms -->
-                        <GroupBox Grid.Column="1" Header="Algorithms" Padding="8" Margin="0">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4">
-                                    <RadioButton x:Name="RbSHA256" Content="SHA256" Margin="0,0,12,0"
-                                                 Style="{StaticResource MaterialDesignRadioButton}" IsChecked="True"/>
-                                    <RadioButton x:Name="RbSHA512" Content="SHA512" Margin="0,0,12,0"
-                                                 Style="{StaticResource MaterialDesignRadioButton}" />
-                                    <RadioButton x:Name="RbMD5" Content="MD5" Margin="0,0,12,0"
-                                                 Style="{StaticResource MaterialDesignRadioButton}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0,8,0,0">
-                                    <RadioButton x:Name="RbBCrypt" Content="BCrypt" Style="{StaticResource MaterialDesignRadioButton}" />
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,6,0,0">
-                                        <TextBlock Text="Cost" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <Slider x:Name="BcryptCostSlider" Minimum="4" Maximum="16" Value="10"
-                                                Width="220" TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Style="{StaticResource MaterialDesignSlider}" />
-                                        <TextBlock Text="{Binding ElementName=BcryptCostSlider, Path=Value}" Margin="8,0,0,0"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <StackPanel Margin="0,8,0,0">
-                                    <RadioButton x:Name="RbArgon2" Content="Argon2" Style="{StaticResource MaterialDesignRadioButton}" />
-                                    <StackPanel Orientation="Horizontal" Margin="20,6,0,0" HorizontalAlignment="Left" >
-                                        <StackPanel>
-                                            <TextBlock Text="Memory (KB)" FontSize="11" Margin="0,0,0,4"/>
-                                            <TextBox x:Name="Argon2MemoryBox" Width="90" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                                     materialDesign:HintAssist.Hint="e.g. 65536" />
-                                        </StackPanel>
-                                        <StackPanel Margin="12,0,0,0">
-                                            <TextBlock Text="Iterations" FontSize="11" Margin="0,0,0,4"/>
-                                            <TextBox x:Name="Argon2IterationsBox" Width="90" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                                     materialDesign:HintAssist.Hint="e.g. 3" />
-                                        </StackPanel>
-                                        <StackPanel Margin="12,0,0,0">
-                                            <TextBlock Text="Parallelism" FontSize="11" Margin="0,0,0,4"/>
-                                            <TextBox x:Name="Argon2ParallelismBox" Width="90" Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                                     materialDesign:HintAssist.Hint="e.g. 2" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
-                    </Grid>
-
-                    <!-- Generate Button -->
-                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,12,0,12">
-                        <Button x:Name="GenerateButton" Content="Generate Hashes" Width="160" Height="40"
-                                Background="{StaticResource AccentTealBrush}" Foreground="White"
-                                Style="{StaticResource MaterialDesignRaisedButton}" />
-                    </StackPanel>
-
-                    <!-- Results DataGrid -->
-                    <DataGrid x:Name="ResultsDataGrid" Grid.Row="4" Margin="0,8,0,0"
-                              AutoGenerateColumns="False" IsReadOnly="True"
-                              CanUserAddRows="False" HeadersVisibility="Column"
-                              RowHeight="30" ColumnHeaderHeight="36"
-                              AlternatingRowBackground="{DynamicResource MaterialDesignPaper}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Algorithm" Binding="{Binding Algorithm}" Width="180"/>
-                            <DataGridTextColumn Header="Hash Output" Binding="{Binding HashOutput}" Width="*"/>
-                            <DataGridTextColumn Header="Time (ms)" Binding="{Binding TimeMs}" Width="120"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <TextBlock Text="Symmetric Encryption UI will be implemented here (AES, 3DES, ChaCha20) using a Green Accent."
+                               Foreground="{StaticResource AccentGreenBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
 
-            <!-- Symmetric Encryption Tab (placeholder for MVVM view) -->
-            <TabItem Header="Symmetric Encryption">
+            <!-- 3. Asymmetric Encryption Tab -->
+            <TabItem Header="Asymmetric Encryption" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentBlueBrush}">
                 <Grid Margin="12">
-                    <TextBlock Text="Symmetric Encryption UI will be added here." Foreground="{DynamicResource MaterialDesignBody}" />
+                    <TextBlock Text="Asymmetric Encryption UI will be implemented here (RSA, ECC) using a Blue Accent."
+                               Foreground="{StaticResource AccentBlueBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
 
-            <!-- Asymmetric Encryption Tab (placeholder) -->
-            <TabItem Header="Asymmetric Encryption">
+            <!-- 4. Digital Signatures Tab -->
+            <TabItem Header="Digital Signatures" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentRedBrush}">
                 <Grid Margin="12">
-                    <TextBlock Text="Asymmetric Encryption UI will be added here." Foreground="{DynamicResource MaterialDesignBody}" />
-                </Grid>
-            </TabItem>
-
-            <!-- Digital Signatures Tab (placeholder) -->
-            <TabItem Header="Digital Signatures">
-                <Grid Margin="12">
-                    <TextBlock Text="Digital Signatures UI will be added here." Foreground="{DynamicResource MaterialDesignBody}" />
+                    <TextBlock Text="Digital Signatures UI will be implemented here (RSA-SHA256, ECDSA) using a Red Accent."
+                               Foreground="{StaticResource AccentRedBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
         </TabControl>
