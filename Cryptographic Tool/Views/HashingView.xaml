@@ -1,13 +1,17 @@
 ﻿<!--
 PSEUDOCODE / PLAN (detailed):
-1. Remove the outer ScrollViewer that wraps the DataGrid so the DataGrid's internal ScrollViewer handles mouse wheel and touch gestures.
-2. Enable the DataGrid's internal ScrollViewer to support touch panning and normal mouse-wheel scrolling by setting attached properties:
-   - ScrollViewer.VerticalScrollBarVisibility="Auto"
-   - ScrollViewer.HorizontalScrollBarVisibility="Auto"
-   - ScrollViewer.PanningMode="VerticalOnly"
-   - IsManipulationEnabled="True"
-3. Keep row/cell styles and dark theme unchanged.
-4. Verify in runtime that mouse wheel and touchpad two-finger scrolling work on the DataGrid.
+1. Goal: Remove the local overlay loader UI from this view and rely on a centralized overlay controlled by the application's MainViewModel/MainView.
+2. Rationale:
+   - Centralized overlay avoids duplicating loader UI across individual views.
+   - MainViewModel exposes a shared `IsBusy` boolean; MainView (shell) will show/hide a global overlay when that flag is true.
+3. Changes to perform in this file:
+   - Remove the overlay Grid that was covering Grid.RowSpan="5" and bound to the local ViewModel.IsBusy.
+   - Leave a clear comment indicating the overlay was moved to MainView/MainViewModel.
+   - Keep all existing resources, DataGrid, controls, and bindings intact so this view continues to function.
+4. Assumptions / Next steps:
+   - MainView (or the host window) contains an overlay element bound to MainViewModel.IsBusy.
+   - If this view needs to trigger the busy indicator, its ViewModel should notify the shared MainViewModel (e.g., via event aggregator, shared service, or direct reference).
+   - No code-behind changes are required here.
 -->
 
 <UserControl x:Class="Cryptographic_Tool.Views.HashingView"
@@ -20,10 +24,9 @@ PSEUDOCODE / PLAN (detailed):
              d:DesignHeight="550" d:DesignWidth="900"
              Background="#121212">
 
-    <!-- Set the DataContext to the HashingViewModel for design-time and runtime access -->
-    <UserControl.DataContext>
-        <vm:HashingViewModel/>
-    </UserControl.DataContext>
+    <!-- NOTE: The overlay loader previously present in this view has been removed.
+         A centralized overlay bound to MainViewModel.IsBusy should be provided by the host (MainView).
+    -->
 
     <UserControl.Resources>
         <ResourceDictionary>

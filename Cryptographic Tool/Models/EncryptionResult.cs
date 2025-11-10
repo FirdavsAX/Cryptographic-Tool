@@ -1,9 +1,11 @@
-﻿namespace Cryptographic_Tool.Models;
+﻿using System;
 
-public class EncryptionResult
+namespace Cryptographic_Tool.Models;
+
+/// <summary>
+/// Legacy placeholder to avoid breaking references. Use <see cref="SymmetricEncryptionResult"/> instead.
+/// </summary>
+[Obsolete("Use SymmetricEncryptionResult in Cryptographic_Tool.Models")]
+public class EncryptionResult : SymmetricEncryptionResult
 {
-    public string Algorithm { get; set; }
-    public string EncryptedData { get; set; }
-    public string DecryptedData { get; set; }
-    public TimeOnly TimeMs { get; set; }
 }

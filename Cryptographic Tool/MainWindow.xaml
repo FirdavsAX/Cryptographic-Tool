@@ -126,30 +126,6 @@
             <TabItem Header="Hashing" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentOrangeBrush}">
                 <views:HashingView />
             </TabItem>
-
-            <!-- 2. Symmetric Encryption Tab -->
-            <TabItem Header="Symmetric Encryption" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentGreenBrush}">
-                <Grid Margin="12">
-                    <TextBlock Text="Symmetric Encryption UI will be implemented here (AES, 3DES, ChaCha20) using a Green Accent."
-                               Foreground="{StaticResource AccentGreenBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Top" />
-                </Grid>
-            </TabItem>
-
-            <!-- 3. Asymmetric Encryption Tab -->
-            <TabItem Header="Asymmetric Encryption" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentBlueBrush}">
-                <Grid Margin="12">
-                    <TextBlock Text="Asymmetric Encryption UI will be implemented here (RSA, ECC) using a Blue Accent."
-                               Foreground="{StaticResource AccentBlueBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Top" />
-                </Grid>
-            </TabItem>
-
-            <!-- 4. Digital Signatures Tab -->
-            <TabItem Header="Digital Signatures" Style="{StaticResource TabHeaderStyle}" Foreground="{StaticResource AccentRedBrush}">
-                <Grid Margin="12">
-                    <TextBlock Text="Digital Signatures UI will be implemented here (RSA-SHA256, ECDSA) using a Red Accent."
-                               Foreground="{StaticResource AccentRedBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Top" />
-                </Grid>
-            </TabItem>
         </TabControl>
     </DockPanel>
 </Window>
